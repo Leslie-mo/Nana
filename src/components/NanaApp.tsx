@@ -26,7 +26,7 @@ const nanaAvatar: PetAvatar = {
 
 export function NanaApp() {
   const [activeTab, setActiveTab] = useState<TabId>("home");
-  const [locale, setLocale] = useState<Locale>("zh");
+  const [locale, setLocale] = useState<Locale>("ja");
   const [profiles, setProfiles] = useState<PetProfile[]>(initialPets);
   const [socialPosts, setSocialPosts] = useState<SocialPost[]>(initialSocialPosts);
   const [activePetId, setActivePetId] = useState("nana");
