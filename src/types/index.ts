@@ -64,6 +64,7 @@ export interface SocialPost {
   imagePosition?: string;
   titleKey?: string;
   captionKey?: string;
+  hashtagsKey?: string;
   title?: string;
   caption?: string;
   hashtags?: string[];
@@ -79,7 +80,8 @@ export interface SocialComment {
   id: string;
   petName: string;
   avatarUrl: string;
-  text: string;
+  textKey?: string;
+  text?: string;
 }
 
 export interface SocialPostDraft {

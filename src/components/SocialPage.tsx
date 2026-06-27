@@ -50,6 +50,9 @@ export function SocialPage({
 
         {posts.map((post) => {
           const isLiked = Boolean(liked[post.id]);
+          const title = post.title ?? (post.titleKey ? t(post.titleKey) : undefined);
+          const caption = post.caption ?? (post.captionKey ? t(post.captionKey) : "");
+          const hashtags = post.hashtags ?? (post.hashtagsKey ? t(post.hashtagsKey).split(" ") : undefined);
           return (
             <article key={post.id} className="overflow-hidden rounded-[28px] bg-white shadow-soft">
               <div className="flex items-center gap-3 p-4">
@@ -93,20 +96,20 @@ export function SocialPage({
                   <button className="text-stone-600" aria-label={t("social.share")}><Send size={20} /></button>
                 </div>
                 <p className="mt-3 text-xs font-bold">{post.likes + (isLiked ? 1 : 0)} {t("social.likes")}</p>
-                {post.title && <h2 className="mt-2 text-base font-black">{post.title}</h2>}
+                {title && <h2 className="mt-2 text-base font-black">{title}</h2>}
                 <p className="mt-2 text-sm leading-6">
                   <strong className="mr-2">{post.petName}</strong>
-                  {post.caption ?? (post.captionKey ? t(post.captionKey) : "")}
+                  {caption}
                 </p>
-                {post.hashtags && (
-                  <p className="mt-2 text-xs font-bold text-cocoa">{post.hashtags.join(" ")}</p>
+                {hashtags && (
+                  <p className="mt-2 text-xs font-bold text-cocoa">{hashtags.join(" ")}</p>
                 )}
                 {post.commentList && (
                   <div className="mt-3 space-y-2">
                     {post.commentList.slice(0, 2).map((comment) => (
                       <p key={comment.id} className="text-xs leading-5 text-stone-600">
                         <strong className="mr-1 text-ink">{comment.petName}</strong>
-                        {comment.text}
+                        {comment.text ?? (comment.textKey ? t(comment.textKey) : "")}
                       </p>
                     ))}
                   </div>
