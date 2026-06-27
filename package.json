@@ -5,6 +5,7 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
+    "gemini:test": "node scripts/gemini-test.mjs",
     "start": "next start",
     "lint": "next lint"
   },

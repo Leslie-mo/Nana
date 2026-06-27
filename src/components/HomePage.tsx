@@ -1,11 +1,11 @@
 "use client";
 
 import { Activity, Camera, Droplets, Heart, Sparkles, Upload } from "lucide-react";
+import { useState } from "react";
 import type { Locale, PetAvatar } from "@/types";
 import { useAppContext } from "./AppContext";
-import { AnimatedAvatar } from "./AnimatedAvatar";
+import { AnimatedPetAvatar } from "./AnimatedPetAvatar";
 import { AppHeader } from "./AppHeader";
-import { FloatingPetStage } from "./FloatingPetStage";
 
 export function HomePage({
   locale,
@@ -22,6 +22,12 @@ export function HomePage({
 }) {
   const { activePet } = useAppContext();
   const hasPetImage = Boolean(activePet.avatarImageUrl);
+  const [showBirthBubble, setShowBirthBubble] = useState(false);
+
+  function activateAvatar() {
+    setShowBirthBubble(true);
+    window.setTimeout(() => setShowBirthBubble(false), 2200);
+  }
 
   return (
     <>
@@ -35,15 +41,35 @@ export function HomePage({
         <section className="relative h-[390px] overflow-hidden rounded-[34px] bg-gradient-to-b from-[#FFF8F0] via-[#F5E8D9] to-[#E8D2BC] px-4 shadow-soft">
           <div className="absolute inset-0 rounded-[34px] bg-[radial-gradient(circle_at_50%_35%,rgba(255,255,255,.9),transparent_38%),radial-gradient(circle_at_20%_20%,rgba(255,205,147,.45),transparent_22rem)]" />
           <div className="relative z-10 h-full">
-            {activePet.poseSpriteUrl ? (
-              <FloatingPetStage pet={activePet} />
-            ) : avatar ? (
-              <AnimatedAvatar avatar={avatar} petName={activePet.name} />
-            ) : hasPetImage ? (
-              <div
-                className="mx-auto h-full w-[88%] bg-contain bg-center bg-no-repeat drop-shadow-2xl"
-                style={{ backgroundImage: `url(${activePet.avatarImageUrl})` }}
-              />
+            {avatar || hasPetImage ? (
+              <div className="relative h-full">
+                <AnimatedPetAvatar
+                  frames={avatar?.frames ?? activePet.animationFrameUrls}
+                  fallbackAvatar={avatar?.avatarImageUrl ?? (activePet.avatarImageUrl || "/images/shot/nana_cat_01.png")}
+                  petName={activePet.name}
+                  action="idle"
+                  onActivate={activateAvatar}
+                  className="mx-auto"
+                />
+                <div className="absolute left-4 top-4 rounded-full bg-white/90 px-3 py-2 text-[10px] font-bold text-cocoa shadow-sm backdrop-blur">
+                  {t("home.twinActive")}
+                </div>
+                {avatar?.avatarSpec && (
+                  <div className="absolute bottom-4 left-4 right-4 rounded-[22px] bg-white/88 p-4 shadow-soft backdrop-blur">
+                    <p className="text-[10px] font-bold uppercase tracking-widest text-cocoa">
+                      {t("avatar.generatedByGemini")}
+                    </p>
+                    <p className="mt-1 text-xs leading-5 text-stone-600">
+                      {avatar.avatarSpec.personalityImpression}
+                    </p>
+                  </div>
+                )}
+                {showBirthBubble && (
+                  <div className="absolute right-5 top-16 max-w-[210px] rounded-[22px] rounded-br-md bg-white px-4 py-3 text-xs font-bold leading-5 text-ink shadow-soft">
+                    {t("home.digitalBirthBubble")}
+                  </div>
+                )}
+              </div>
             ) : (
               <div className="flex h-full flex-col items-center justify-center text-center">
                 <div className="grid h-20 w-20 place-items-center rounded-[28px] bg-white/70 text-cocoa shadow-soft">

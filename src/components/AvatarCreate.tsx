@@ -17,18 +17,27 @@ import {
   useState,
 } from "react";
 import { animatePetAvatar, generatePetAvatar } from "@/lib/gemini";
-import type { PetAvatar } from "@/types";
-import { AnimatedAvatar } from "./AnimatedAvatar";
+import type { Locale, PetAvatar } from "@/types";
+import { AnimatedPetAvatar } from "./AnimatedPetAvatar";
 
 type CreateStep = "select" | "camera" | "preview" | "generating" | "result";
+type GenerationPhase = 1 | 2 | 3 | 4;
+const generationSteps: Array<[string, GenerationPhase]> = [
+  ["avatar.flowUpload", 1],
+  ["avatar.flowAnalyze", 2],
+  ["avatar.flowBuild", 3],
+  ["avatar.flowReady", 4],
+];
 
 export function AvatarCreate({
   initialMode,
+  locale,
   onClose,
   onComplete,
   t,
 }: {
   initialMode: "upload" | "camera";
+  locale: Locale;
   onClose: () => void;
   onComplete: (avatar: PetAvatar) => void;
   t: (key: string) => string;
@@ -37,6 +46,8 @@ export function AvatarCreate({
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState("");
   const [avatar, setAvatar] = useState<PetAvatar | null>(null);
+  const [generationPhase, setGenerationPhase] = useState<GenerationPhase>(1);
+  const [generationError, setGenerationError] = useState("");
   const [cameraError, setCameraError] = useState("");
   const [cameraLoading, setCameraLoading] = useState(false);
   const [cameraReady, setCameraReady] = useState(false);
@@ -98,6 +109,7 @@ export function AvatarCreate({
     if (previewUrl) URL.revokeObjectURL(previewUrl);
     setImageFile(file);
     setPreviewUrl(URL.createObjectURL(file));
+    setGenerationError("");
     setStep("preview");
   }
 
@@ -165,10 +177,38 @@ export function AvatarCreate({
   async function generate() {
     if (!imageFile) return;
     setStep("generating");
-    const generatedAvatar = await generatePetAvatar(imageFile);
-    await animatePetAvatar(generatedAvatar);
-    setAvatar(generatedAvatar);
-    setStep("result");
+    setGenerationError("");
+    setGenerationPhase(2);
+    const phaseTimer = window.setInterval(() => {
+      setGenerationPhase((current) => (current < 4 ? ((current + 1) as GenerationPhase) : current));
+    }, 900);
+
+    try {
+      const generatedAvatar = await generatePetAvatar(imageFile, undefined, locale);
+      await animatePetAvatar(generatedAvatar);
+      setGenerationPhase(4);
+      if (generatedAvatar.animationSource === "css-fallback") {
+        setGenerationError(t("avatar.localFallback"));
+      }
+      setAvatar(generatedAvatar);
+      setStep("result");
+    } catch {
+      setGenerationError(t("avatar.localFallback"));
+      setAvatar({
+        id: `nana-avatar-${Date.now()}`,
+        sourceImageUrl: previewUrl,
+        avatarImageUrl: previewUrl,
+        style: "css-fallback-digital-character",
+        personalitySeed: "local animation fallback",
+        createdAt: new Date().toISOString(),
+        frames: [],
+        animationType: "idle",
+        animationSource: "css-fallback",
+      });
+      setStep("result");
+    } finally {
+      window.clearInterval(phaseTimer);
+    }
   }
 
   function reset() {
@@ -177,6 +217,8 @@ export function AvatarCreate({
     setPreviewUrl("");
     setImageFile(null);
     setAvatar(null);
+    setGenerationError("");
+    setGenerationPhase(1);
     setStep("select");
   }
 
@@ -340,13 +382,31 @@ export function AvatarCreate({
             <p className="mt-3 max-w-[290px] text-sm leading-6 text-stone-500">
               {t("avatar.generatingHint")}
             </p>
+            <div className="mt-7 w-full space-y-2 rounded-[24px] bg-white p-4 text-left shadow-soft">
+              {generationSteps.map(([key, phase]) => (
+                <div key={key} className="flex items-center gap-3 text-xs font-bold">
+                  <span
+                    className={`grid h-7 w-7 place-items-center rounded-full ${
+                      generationPhase >= phase ? "bg-cocoa text-white" : "bg-cream text-stone-400"
+                    }`}
+                  >
+                    {phase}
+                  </span>
+                  <span className={generationPhase >= phase ? "text-ink" : "text-stone-400"}>{t(key)}</span>
+                </div>
+              ))}
+            </div>
           </div>
         )}
 
         {step === "result" && avatar && (
           <div>
             <div className="relative mx-auto h-[330px] w-full">
-              <AnimatedAvatar avatar={avatar} />
+              <AnimatedPetAvatar
+                frames={avatar.frames}
+                fallbackAvatar={avatar.avatarImageUrl}
+                petName="Nana"
+              />
               <span className="absolute right-4 top-4 flex items-center gap-1.5 rounded-full bg-white/90 px-3 py-2 text-[10px] font-bold text-cocoa shadow-sm backdrop-blur">
                 <span className="h-2 w-2 animate-pulse rounded-full bg-emerald-500" />
                 {t("avatar.alive")}
@@ -360,6 +420,17 @@ export function AvatarCreate({
               <p className="mt-2 text-sm leading-6 text-stone-500">
                 {t("avatar.completeDescription")}
               </p>
+              <p className="mt-3 text-xs font-bold text-cocoa">{t("avatar.generatedByGemini")}</p>
+              {avatar.avatarSpec?.personalityImpression && (
+                <p className="mx-auto mt-2 max-w-[290px] rounded-2xl bg-white px-4 py-3 text-xs leading-5 text-stone-500 shadow-sm">
+                  {avatar.avatarSpec.personalityImpression}
+                </p>
+              )}
+              {generationError && (
+                <p className="mx-auto mt-2 max-w-[290px] rounded-2xl bg-amber-50 px-4 py-3 text-xs leading-5 text-amber-700">
+                  {generationError}
+                </p>
+              )}
             </div>
             <div className="mt-5 flex flex-wrap justify-center gap-2">
               {["avatar.tagAi", "avatar.tagMemory", "avatar.tagPersonality"].map((key) => (

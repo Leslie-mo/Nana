@@ -19,6 +19,13 @@ export interface ChatMessage {
   role: "user" | "nana";
   text: string;
   evidence?: string;
+  evidenceItems?: string[];
+  mood?: NanaMood;
+  action?: NanaAction;
+  media?: NanaReplyMedia;
+  mediaKey?: string;
+  fallbackReason?: "quota" | "demo";
+  suggestedPost?: NanaSuggestedPost;
   imageUrl?: string;
   imagePosition?: string;
   socialDraft?: SocialPostDraft;
@@ -31,6 +38,10 @@ export interface PetAvatar {
   style: string;
   personalitySeed: string;
   createdAt: string;
+  avatarSpec?: PetAvatarSpec;
+  frames?: string[];
+  animationType?: "idle" | "wave" | "jump";
+  animationSource?: AnimatedPetAvatarResult["source"];
 }
 
 export interface AnimatedAvatar {
@@ -38,6 +49,66 @@ export interface AnimatedAvatar {
   animationType: string;
   previewUrl: string;
 }
+
+export type PetAvatarSpec = {
+  species: string;
+  breedGuess: string;
+  bodyShape: string;
+  faceShape: string;
+  eyeColor: string;
+  furColors: string[];
+  furPattern: string;
+  tailShape: string;
+  specialMarks: string[];
+  personalityImpression: string;
+  avatarPrompt: string;
+  animationPrompt: string;
+};
+
+export type AnimatedPetAvatarResult = {
+  avatarSpec: PetAvatarSpec;
+  frames: string[];
+  animationType: "idle" | "wave" | "jump";
+  source: "gemini-spec-fallback-frames" | "css-fallback";
+};
+
+export type NanaMood = "happy" | "curious" | "sleepy" | "angry" | "playful" | "hungry" | "shy";
+
+export type NanaAction = "idle" | "wave" | "jump" | "blink" | "sleep" | "cute" | "lookAround";
+
+export type NanaReplyMedia = {
+  type: "image" | "animation";
+  url?: string;
+  frames?: string[];
+  caption?: string;
+};
+
+export type NanaSuggestedPost = {
+  title: string;
+  body: string;
+  hashtags: string[];
+};
+
+export type NanaReply = {
+  text: string;
+  evidence: string[];
+  mediaKey?: string;
+  fallbackReason?: "quota" | "demo";
+  mood?: NanaMood;
+  action?: NanaAction;
+  media?: NanaReplyMedia;
+  suggestedPost?: NanaSuggestedPost;
+};
+
+export type NanaChatContext = {
+  petProfile: unknown;
+  personalityTraits: unknown;
+  todayStatus: unknown;
+  lifeArchive: unknown;
+  memories: unknown;
+  socialPosts: unknown;
+  recentChatMessages: Array<{ role: "user" | "nana"; text: string }>;
+};
 
 export interface PetProfile {
   id: string;

@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from "react";
 import type { Locale, PetAvatar, PetProfile, SocialPost, TabId } from "@/types";
-import { NANA_IDENTITY_PROMPT, pets as initialPets, socialPosts as initialSocialPosts } from "@/data/mockData";
+import { NANA_IDENTITY_PROMPT, nanaAnimationFrames, pets as initialPets, socialPosts as initialSocialPosts } from "@/data/mockData";
 import { translate } from "@/i18n/messages";
 import { AppContextProvider } from "./AppContext";
 import { AskPage } from "./AskPage";
@@ -17,11 +17,14 @@ import { SocialPage } from "./SocialPage";
 
 const nanaAvatar: PetAvatar = {
   id: "nana-avatar-preset",
-  sourceImageUrl: "/images/nana-ai-avatar.png",
-  avatarImageUrl: "/images/nana-ai-avatar.png",
+  sourceImageUrl: "/images/shot/nana_cat_01.png",
+  avatarImageUrl: "/images/shot/nana_cat_01.png",
   style: "tabby-white-3d-digital-character",
   personalitySeed: `curious-calm-charming-slightly-sassy | ${NANA_IDENTITY_PROMPT}`,
   createdAt: "2026-06-14T00:00:00.000Z",
+  frames: nanaAnimationFrames,
+  animationType: "idle",
+  animationSource: "gemini-spec-fallback-frames",
 };
 
 export function NanaApp() {
@@ -71,6 +74,7 @@ export function NanaApp() {
         key={`ask-${locale}-${activePet.id}`}
         {...commonProps}
         avatar={avatar}
+        socialPosts={socialPosts}
         onPublishPost={(post) => {
           setSocialPosts((current) => [post, ...current]);
           setActiveTab("social");
@@ -124,12 +128,13 @@ export function NanaApp() {
       >
         <div className="relative mx-auto h-[100dvh] w-full max-w-[430px] overflow-hidden bg-cream md:mx-0 md:h-[min(880px,calc(100dvh-48px))] md:min-h-[660px] md:rounded-[42px] md:border-[8px] md:border-white md:shadow-device">
           <div className="pointer-events-none absolute left-1/2 top-2 z-50 hidden h-5 w-24 -translate-x-1/2 rounded-full bg-[#2B2724] md:block" />
-          <div className="no-scrollbar h-full overflow-y-auto md:pt-5">{pages[activeTab]}</div>
+          <div className={`no-scrollbar h-full md:pt-5 ${activeTab === "ask" ? "overflow-hidden" : "overflow-y-auto"}`}>{pages[activeTab]}</div>
           <BottomNav active={activeTab} onChange={setActiveTab} t={t} />
 
           {avatarCreatorOpen && (
             <AvatarCreate
               initialMode={avatarStartMode}
+              locale={locale}
               t={t}
               onClose={() => setAvatarCreatorOpen(false)}
               onComplete={(createdAvatar) => {
@@ -142,6 +147,8 @@ export function NanaApp() {
                           avatarImageUrl: createdAvatar.avatarImageUrl,
                           memoryImageUrl: createdAvatar.avatarImageUrl,
                           socialImageUrl: createdAvatar.avatarImageUrl,
+                          identityPrompt: createdAvatar.avatarSpec?.avatarPrompt ?? profile.identityPrompt,
+                          animationFrameUrls: createdAvatar.frames?.length ? createdAvatar.frames : profile.animationFrameUrls,
                           isAiAvatar: true,
                         }
                       : profile,
