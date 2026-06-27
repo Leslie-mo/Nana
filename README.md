@@ -1,50 +1,66 @@
 # Pet Digital Twin / Nana
 
-为 Gemini AI Hackathon 打造的 2 分钟 Demo 原型。Nana 不是普通的宠物管理档案，而是一个会从日常行为、影像和共同经历中持续成长、形成记忆并以宠物视角对话的数字生命。
+Nana is not just a standard pet profile, but a dynamic digital life that continuously grows from daily behavior, photos, and shared experiences. It forms its own memories and holds conversations from a pet's first-person perspective.
 
-## 运行
+## Getting Started
+
+### Prerequisites
+
+Make sure you have Node.js installed on your system. If you are using the portable Node.js setup:
+
+```powershell
+# Set portable Node path
+$env:PATH = 'C:\Users\YueqiuchiY1\.node-portable;' + $env:PATH
+```
+
+### Installation
 
 ```bash
 npm install
+```
+
+### Run Local Development Server
+
+```bash
 npm run dev
 ```
 
-浏览器打开 `http://localhost:3000`。界面移动端优先；在桌面浏览器中会居中显示为最大宽度 430px 的手机 App。
+Open `http://localhost:3000` in your browser. The interface is mobile-first; on desktop browsers, it centers and displays within a mobile mockup container with a maximum width of 430px.
 
-生产构建：
+### Production Build
 
 ```bash
 npm run build
 npm start
 ```
 
-## 页面
+## Key Pages & Features
 
-- **Home**：数字生命主卡、今日行为总结、情绪状态与 AI 健康发现
-- **Memory**：Google Photos 风格的重要记忆时间线
-- **Ask Nana**：基于生活档案和历史行为证据回答，而非通用聊天
-- **Personality**：五维人格雷达图、属性进度与持续成长的人格类型
-- **Life Replay**：年度精彩回顾、AI 总结与模拟生成状态
-- **AI Avatar Create**：上传照片或调用浏览器摄像头拍照，预览后模拟生成会浮动、呼吸和眨眼的 Nana 数字分身
+- **Home**: Main digital twin dashboard, daily behavior summary, emotional states, and AI health/behavior discoveries.
+- **Memory**: A Google Photos-style timeline documenting important memories and milestones.
+- **Ask Nana**: Chat interface where the pet responds based on historical behavior and memories in first-person, rather than generic AI conversation.
+- **Personality**: A 5-dimensional personality radar chart showing character progression and the evolving personality type.
+- **Life Replay**: Annual highlight recap, AI summary, and simulated memory video replay.
+- **AI Avatar Create**: Upload a photo or use the camera to preview and generate an interactive digital twin of Nana that floats, breathes, and blinks.
 
-右上角支持中文、英文、日文切换。当前数据全部来自 `src/data/mockData.ts`，所有界面文案集中在 `src/i18n/messages.ts`。
+*Note: The app supports language switching (Chinese, English, Japanese) at the top-right corner. The demonstration data is loaded from [mockData.ts](file:///c:/Users/YueqiuchiY1/Desktop/Nana/Nana%20pj/src/data/mockData.ts) and localization strings are managed in [messages.ts](file:///c:/Users/YueqiuchiY1/Desktop/Nana/Nana%20pj/src/i18n/messages.ts).*
 
-## 项目结构
+## Project Directory Structure
 
 ```text
 src/
-  app/             Next.js App Router 与全局样式
-  components/      App Shell、导航与五个页面
-  data/            演示用 mock data
-  i18n/            中/英/日文案字典
-  lib/gemini.ts    Gemini 服务 mock 边界
-  types/           TypeScript 类型
-public/images/     Nana 演示图片素材
+  app/             Next.js App Router and global styles
+  components/      App Shell, navigation, and page components
+  data/            Mock data used for demonstrations
+  i18n/            Localization dictionaries (CN/EN/JP)
+  lib/gemini.ts    Mock service boundaries for Gemini API
+  types/           TypeScript type definitions
+public/images/     Visual assets for Nana's moments and UI
 ```
 
-## Gemini 接入计划
+## Gemini Integration Plan
 
-`src/lib/gemini.ts` 已预留以下服务函数：
+The [gemini.ts](file:///c:/Users/YueqiuchiY1/Desktop/Nana/Nana%20pj/src/lib/gemini.ts) file reserves placeholders for the following service functions:
 
 - `analyzePetImage`
 - `summarizePetDay`
@@ -52,10 +68,13 @@ public/images/     Nana 演示图片素材
 - `chatWithPetMemory`
 - `generateLifeReplay`
 
-后续可用 Gemini 多模态能力理解照片与视频，通过 Vertex AI 托管模型，将结构化事件、行为向量和摘要写入 Firebase。聊天时检索宠物档案与时间线作为上下文，年度回忆则由 Gemini 汇总记忆并生成叙事脚本。
+### Future Architecture:
+- **Multimodal Understanding**: Use Gemini multimodal capabilities to analyze photos and videos.
+- **Data Persistence**: Store structured events, behavior vector embeddings, and summarizations in Firebase through Vertex AI.
+- **Context Retrieval**: Retrieve the pet's profile, habits, and timeline context during chat sessions to generate highly customized first-person responses.
+- **Visual Avatar Generation**: Utilize Gemini Vision to extract distinct pet traits, Imagen to generate consistent characters, and Veo (or other video models) to generate short looping animations, saving source and output assets to Firebase Storage.
 
-数字形象流程计划使用 Gemini Vision 分析宠物特征、Imagen 生成一致的角色形象、Veo 或动画模型生成短循环动画，并将原图和结果保存至 Firebase Storage。浏览器摄像头需要在 `localhost` 或 HTTPS 安全环境中运行。
+## Assets & Images
 
-## 图片素材
+The mock scene graphics for Nana were generated using built-in image tools, with the final composite asset located at `public/images/nana-moments.png`.
 
-Nana 场景图由内置图像生成工具制作，最终项目素材位于 `public/images/nana-moments.png`。
